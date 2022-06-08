@@ -11,7 +11,7 @@
 
     <groupId>nwellinghoff.jenkins.plugins</groupId>
     <artifactId>multibranch-build-regex-filter-extension</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <name>Pipeline: Multibranch build regex filter extension</name>
     

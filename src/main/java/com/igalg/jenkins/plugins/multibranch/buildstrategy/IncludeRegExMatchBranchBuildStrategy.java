@@ -31,7 +31,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import com.cloudbees.jenkins.plugins.bitbucket.BitbucketGitSCMRevision;
 import com.cloudbees.jenkins.plugins.bitbucket.BitbucketSCMSource;
+import com.cloudbees.jenkins.plugins.bitbucket.BranchSCMHead;
 import com.cloudbees.jenkins.plugins.bitbucket.PullRequestSCMHead;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
@@ -80,8 +82,16 @@ public class IncludeRegExMatchBranchBuildStrategy extends BranchBuildStrategyExt
         String serverUrl = src.getServerUrl();
         StandardCredentials credentials = Helper.lookupScanCredentials(src.getOwner(), credentialsId, serverUrl);
         UsernamePasswordCredentialsImpl creds = (UsernamePasswordCredentialsImpl) credentials;
-        //parse out pull request id
-        List<String> files = Helper.getFileListForPullRequest(serverUrl,creds,owner,repository,((PullRequestSCMHead) currRevision.getHead()).getId());
+        //if PR parse out pull request id
+        List<String> files = new ArrayList<>();
+        if(currRevision.getHead() instanceof PullRequestSCMHead){
+            files = Helper.getFileListForPullRequest(serverUrl,creds,owner,repository,((PullRequestSCMHead) currRevision.getHead()).getId());
+        }else if (currRevision instanceof BitbucketGitSCMRevision && currRevision.getHead() instanceof BranchSCMHead){
+            files = Helper.getFileListForRevision(serverUrl,creds,owner,repository,((BitbucketGitSCMRevision) currRevision).getHash());
+        }else{
+            logger.severe("Unsupported Git server action " + currRevision.getHead().getClass().getCanonicalName());
+        }
+
 
         List<String> regExList = Arrays.stream(
                 includedRegions.split("\n")).map(e -> e.trim()).collect(Collectors.toList());
