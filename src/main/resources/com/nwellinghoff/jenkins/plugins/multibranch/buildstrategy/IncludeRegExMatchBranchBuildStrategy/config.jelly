@@ -3,4 +3,7 @@
   <f:entry title="RegEx Match Patterns" field="includedRegions">
     <f:textarea />
   </f:entry>
+  <f:entry title="Ignore event if branch is part of open PR" field="ignoreBranchIfPR">
+      <f:checkbox/>
+    </f:entry>
 </j:jelly>

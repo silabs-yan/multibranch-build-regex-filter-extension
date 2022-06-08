@@ -1,4 +1,4 @@
-package com.igalg.jenkins.plugins.multibranch.buildstrategy;
+package com.nwellinghoff.jenkins.plugins.multibranch.buildstrategy;
 
 import com.cloudbees.jenkins.plugins.bitbucket.api.BitbucketAuthenticator;
 import com.cloudbees.plugins.credentials.CredentialsMatcher;
@@ -6,6 +6,7 @@ import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.Util;
 import hudson.model.Item;
@@ -21,21 +22,15 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class Helper {
 
     private static final Logger logger = Logger.getLogger(Helper.class.getName());
 
-    public static List<String> getFileListForPullRequest(String baseUrl, UsernamePasswordCredentialsImpl creds, String owner, String repo, String pullRequestId){
-        String url = baseUrl + "/rest/api/1.0/projects/" + owner + "/repos/" + repo + "/pull-requests/" + pullRequestId + ".diff";
-        String gitDiff = null;
-        List<String> filePaths = new ArrayList<String>();
-
+    public static String doGetRequest(String url,UsernamePasswordCredentialsImpl creds,String accept){
+        String rawResponse = null;
         try(CloseableHttpClient httpClient = HttpClientBuilder.create().build()){
             HttpGet request = new HttpGet(url);
 
@@ -43,46 +38,42 @@ public class Helper {
             String encoding = Base64.getEncoder().encodeToString((creds.getUsername() + ":" + creds.getPassword()).getBytes());
             //request.addHeader("Authorization", "Bearer " + token);
             request.addHeader("Authorization", "Basic " + encoding);
-            request.addHeader(HttpHeaders.ACCEPT, "text/plain");
+            request.addHeader(HttpHeaders.ACCEPT, accept);
 
             CloseableHttpResponse response = httpClient.execute(request);
             HttpEntity entity = response.getEntity();
             if (entity != null) {
                 // return it as a String
-                gitDiff = EntityUtils.toString(entity);
-                filePaths = splitRawGitDiffIntoFilePaths(gitDiff);
+                rawResponse = EntityUtils.toString(entity);
             }
         }catch (Exception e){
             logger.severe(e.getMessage());
         }
-        return filePaths;
+        return rawResponse;
+    }
+
+    public static List<String> getFileListForPullRequest(String baseUrl, UsernamePasswordCredentialsImpl creds, String owner, String repo, String pullRequestId){
+        String url = baseUrl + "/rest/api/1.0/projects/" + owner + "/repos/" + repo + "/pull-requests/" + pullRequestId + ".diff";
+        return splitRawGitDiffIntoFilePaths(doGetRequest(url,creds, "text/plain"));
     }
 
     public static List<String> getFileListForRevision(String baseUrl, UsernamePasswordCredentialsImpl creds, String owner, String repo, String hash){
         String url = baseUrl + "/rest/api/1.0/projects/" + owner + "/repos/" + repo + "/commits/" + hash + "/diff";
-        String gitDiff = null;
-        List<String> filePaths = new ArrayList<String>();
+        return splitRawGitDiffIntoFilePaths(doGetRequest(url,creds,"text/plain"));
+    }
 
-        try(CloseableHttpClient httpClient = HttpClientBuilder.create().build()){
-            HttpGet request = new HttpGet(url);
-
-            // add request headers
-            String encoding = Base64.getEncoder().encodeToString((creds.getUsername() + ":" + creds.getPassword()).getBytes());
-            //request.addHeader("Authorization", "Bearer " + token);
-            request.addHeader("Authorization", "Basic " + encoding);
-            request.addHeader(HttpHeaders.ACCEPT, "text/plain");
-
-            CloseableHttpResponse response = httpClient.execute(request);
-            HttpEntity entity = response.getEntity();
-            if (entity != null) {
-                // return it as a String
-                gitDiff = EntityUtils.toString(entity);
-                filePaths = splitRawGitDiffIntoFilePaths(gitDiff);
-            }
+    public static boolean checkIfBranchIsAssociatedWithOpenPR(String baseUrl, UsernamePasswordCredentialsImpl creds, String owner, String repo, String fullyQualifiedBranchID){
+        String url = baseUrl + "/rest/api/1.0/projects/" + owner + "/repos/" + repo + "/pull-requests?direction=OUTGOING&at=refs/heads/" + fullyQualifiedBranchID;
+        ObjectMapper mapper = new ObjectMapper();
+        try{
+            Map<String,Object> map = mapper.readValue(doGetRequest(url,creds,"*/*"), Map.class);
+            if((Integer) map.get("size") > 0)
+                return true;
         }catch (Exception e){
             logger.severe(e.getMessage());
         }
-        return filePaths;
+        //default to a match
+        return false;
     }
 
     public static List<String> splitRawGitDiffIntoFilePaths(String rawDiff){

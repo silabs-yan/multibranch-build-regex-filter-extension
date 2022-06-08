@@ -14,7 +14,8 @@ Run build on any regex match strategy
 
 ![Multibranch build strategy extension](/images/exclude.png)
 
-Fill the textarea with RegEx patterns:
-^folder1/.*$ \
+Fill the textarea with RegEx patterns:\
+^rootFolder/.*$ \
+^fileInRoot.c/.*$ \
 ^.+/subfolder/.*$
 
