@@ -14,7 +14,7 @@ Run build on any regex match strategy
 
 ![Multibranch build strategy extension](/images/exclude.png)
 
-fill the textarea with ant style exclusions:
+fill the textarea with RegEx patterns:
 ^folder1/,*$
 ^.+/subfolder/.*$'
 
