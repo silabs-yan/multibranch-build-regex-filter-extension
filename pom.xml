@@ -61,7 +61,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.303.x</artifactId>
+                <artifactId>bom-2.289.x</artifactId>
                 <version>1409.v7659b_c072f18</version>
                 <scope>import</scope>
                 <type>pom</type>
@@ -105,7 +105,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>cloudbees-bitbucket-branch-source</artifactId>
-            <version>773.v4b_9b_005b_562b_</version>
+            <version>762.v969cfe087fc0</version>
         </dependency>
         <!-- /plugin dependencies -->
 

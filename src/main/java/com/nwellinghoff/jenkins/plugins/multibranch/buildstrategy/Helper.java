@@ -40,11 +40,12 @@ public class Helper {
             request.addHeader("Authorization", "Basic " + encoding);
             request.addHeader(HttpHeaders.ACCEPT, accept);
 
-            CloseableHttpResponse response = httpClient.execute(request);
-            HttpEntity entity = response.getEntity();
-            if (entity != null) {
-                // return it as a String
-                rawResponse = EntityUtils.toString(entity);
+            try(CloseableHttpResponse response = httpClient.execute(request)){
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    // return it as a String
+                    rawResponse = EntityUtils.toString(entity);
+                }
             }
         }catch (Exception e){
             logger.severe(e.getMessage());
