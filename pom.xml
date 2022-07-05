@@ -11,7 +11,7 @@
 
     <groupId>nwellinghoff.jenkins.plugins</groupId>
     <artifactId>multibranch-build-regex-filter-extension</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>v0.0.5-alpha</version>
     <packaging>hpi</packaging>
     <name>Pipeline: Multibranch build regex filter extension</name>
     
@@ -19,7 +19,7 @@
     Useful in large repositories with many CI jobs. Inspired and stubbed by https://wiki.jenkins.io/display/JENKINS/Multibranch+Build+Strategy+Extension+Plugin</description>
 
     <properties>
-        <jenkins.version>2.303.3</jenkins.version>
+        <jenkins.version>2.289.3</jenkins.version>
         <java.level>8</java.level>
         <hpi.compatibleSinceVersion>2.0</hpi.compatibleSinceVersion>
     </properties>
@@ -62,7 +62,7 @@
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-2.289.x</artifactId>
-                <version>1409.v7659b_c072f18</version>
+                <version>1181.v04b_21d4b_0d6c</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -79,21 +79,21 @@
             <groupId>org.jenkins-ci</groupId>
             <artifactId>annotation-indexer</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>junit</artifactId>
-            <version>1.54</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.jenkins-ci.plugins</groupId>-->
+<!--            <artifactId>junit</artifactId>-->
+<!--            <version>1.53</version>-->
+<!--        </dependency>-->
 
         <!-- plugin dependencies -->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>scm-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>github-api</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.jenkins-ci.plugins</groupId>-->
+<!--            <artifactId>github-api</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>git</artifactId>
