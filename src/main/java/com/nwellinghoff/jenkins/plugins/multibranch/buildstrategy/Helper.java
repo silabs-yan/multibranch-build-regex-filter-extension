@@ -16,8 +16,10 @@ import hudson.security.ACL;
 import jenkins.authentication.tokens.api.AuthenticationTokens;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
@@ -27,11 +29,23 @@ import java.util.logging.Logger;
 
 public class Helper {
 
+    private static final int timeout = 60;
+
     private static final Logger logger = Logger.getLogger(Helper.class.getName());
 
     public static String doGetRequest(String url,UsernamePasswordCredentialsImpl creds,String accept){
         String rawResponse = null;
-        try(CloseableHttpClient httpClient = HttpClientBuilder.create().build()){
+
+        //if connection takes longer than 60sec then timeout
+        RequestConfig.Builder requestBuilder = RequestConfig.custom();
+        requestBuilder.setConnectTimeout(timeout * 1000);
+        requestBuilder.setConnectionRequestTimeout(timeout * 1000);
+        requestBuilder.setSocketTimeout(timeout * 1000);
+
+        HttpClientBuilder builder = HttpClientBuilder.create();
+        builder.setDefaultRequestConfig(requestBuilder.build());
+
+        try(CloseableHttpClient httpClient = builder.build()){
             HttpGet request = new HttpGet(url);
 
             // add request headers
@@ -79,11 +93,13 @@ public class Helper {
 
     public static List<String> splitRawGitDiffIntoFilePaths(String rawDiff){
         List<String> filePaths = new ArrayList<>();
-        String[] splitDiff = rawDiff.split("\n");
-        for (String line : splitDiff) {
-            if(line.startsWith("diff --git")){
-                String[] filePathDiffs = line.split("src://")[1].split("dst://");
-                filePaths.addAll(Arrays.asList(filePathDiffs));
+        if(rawDiff != null){
+            String[] splitDiff = rawDiff.split("\n");
+            for (String line : splitDiff) {
+                if(line.startsWith("diff --git")){
+                    String[] filePathDiffs = line.split("src://")[1].split("dst://");
+                    filePaths.addAll(Arrays.asList(filePathDiffs));
+                }
             }
         }
         return filePaths;
