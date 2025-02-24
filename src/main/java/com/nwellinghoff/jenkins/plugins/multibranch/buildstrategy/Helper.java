@@ -24,6 +24,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
+import java.nio.charset.StandardCharsets;
+
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -49,7 +51,7 @@ public class Helper {
             HttpGet request = new HttpGet(url);
 
             // add request headers
-            String encoding = Base64.getEncoder().encodeToString((creds.getUsername() + ":" + creds.getPassword()).getBytes());
+            String encoding = Base64.getEncoder().encodeToString((creds.getUsername() + ":" + creds.getPassword().getPlainText()).getBytes(StandardCharsets.UTF_8));
             //request.addHeader("Authorization", "Bearer " + token);
             request.addHeader("Authorization", "Basic " + encoding);
             request.addHeader(HttpHeaders.ACCEPT, accept);
