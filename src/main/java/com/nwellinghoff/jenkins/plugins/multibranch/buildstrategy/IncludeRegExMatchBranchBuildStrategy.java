@@ -1,6 +1,5 @@
 package com.nwellinghoff.jenkins.plugins.multibranch.buildstrategy;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,7 +24,6 @@ import jenkins.scm.api.SCMSource;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class IncludeRegExMatchBranchBuildStrategy extends BranchBuildStrategy {
-    
 	private static final Logger logger = Logger.getLogger(IncludeRegExMatchBranchBuildStrategy.class.getName());
     private final String includedRegions;
     private final boolean ignoreBranchIfPR;
@@ -60,27 +58,26 @@ public class IncludeRegExMatchBranchBuildStrategy extends BranchBuildStrategy {
         UsernamePasswordCredentialsImpl creds = (UsernamePasswordCredentialsImpl) credentials;
         //if PR parse out pull request id
         List<String> files = new ArrayList<>();
-        if(currRevision.getHead() instanceof PullRequestSCMHead){
+        if(currRevision.getHead() instanceof PullRequestSCMHead) {
             files = Helper.getFileListForPullRequest(serverUrl,creds,owner,repository,((PullRequestSCMHead) currRevision.getHead()).getId());
-        }else if (currRevision instanceof BitbucketGitSCMRevision && currRevision.getHead() instanceof BranchSCMHead){
-            if(!ignoreBranchIfPR || !Helper.checkIfBranchIsAssociatedWithOpenPR(serverUrl,creds,owner,repository,currRevision.getHead().getName()))
+        } else if (currRevision instanceof BitbucketGitSCMRevision && currRevision.getHead() instanceof BranchSCMHead) {
+            if (!ignoreBranchIfPR || !Helper.checkIfBranchIsAssociatedWithOpenPR(serverUrl,creds,owner,repository,currRevision.getHead().getName()))
                 files = Helper.getFileListForRevision(serverUrl,creds,owner,repository,((BitbucketGitSCMRevision) currRevision).getHash());
             else
                 return false;
-        }else{
+        } else {
             logger.severe("Unsupported Git server action " + currRevision.getHead().getClass().getCanonicalName());
         }
-
 
         List<String> regExList = Arrays.stream(
                 includedRegions.split("\n")).map(e -> e.trim()).collect(Collectors.toList());
 
         logger.info(String.format("Excluded regions: %s", regExList.toString()));
         // No regions excluded run the build
-        if(regExList.isEmpty())
+        if (regExList.isEmpty())
             return true;
 
-        for (String regex: regExList){
+        for (String regex: regExList) {
             if(Helper.doesMatch(regex,files))
                 return true;
         }

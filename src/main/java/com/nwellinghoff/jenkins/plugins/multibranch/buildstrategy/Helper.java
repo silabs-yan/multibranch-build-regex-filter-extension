@@ -114,6 +114,21 @@ public class Helper {
     }
 
     public static StandardCredentials lookupScanCredentials(@CheckForNull Item context, @CheckForNull String scanCredentialsId, String serverUrl) {
-        return Util.fixEmpty(scanCredentialsId) == null ? null : (StandardCredentials) CredentialsMatchers.firstOrNull(com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(StandardCredentials.class, context, context instanceof Queue.Task ? Tasks.getDefaultAuthenticationOf((Queue.Task) context) : ACL.SYSTEM, URIRequirementBuilder.fromUri(serverUrl).build()), CredentialsMatchers.allOf(new CredentialsMatcher[]{CredentialsMatchers.withId(scanCredentialsId), AuthenticationTokens.matcher(BitbucketAuthenticator.authenticationContext(serverUrl))}));
+        if (Util.fixEmpty(scanCredentialsId) == null) {
+            return null;
+        }
+
+        return (StandardCredentials) CredentialsMatchers.firstOrNull(
+            com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(
+                StandardCredentials.class,
+                context,
+                context instanceof Queue.Task ? Tasks.getDefaultAuthenticationOf((Queue.Task) context) : ACL.SYSTEM,
+                URIRequirementBuilder.fromUri(serverUrl).build()
+            ),
+            CredentialsMatchers.allOf(
+                CredentialsMatchers.withId(scanCredentialsId),
+                AuthenticationTokens.matcher(BitbucketAuthenticator.authenticationContext(serverUrl))
+            )
+        );
     }
 }
