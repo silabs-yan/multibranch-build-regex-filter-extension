@@ -72,7 +72,7 @@ public class IncludeRegExMatchBranchBuildStrategy extends BranchBuildStrategy {
         List<String> regExList = Arrays.stream(
                 includedRegions.split("\n")).map(e -> e.trim()).collect(Collectors.toList());
 
-        logger.info(String.format("Excluded regions: %s", regExList.toString()));
+        logger.config(String.format("Included regions: %s", regExList.toString()));
         // No regions excluded run the build
         if (regExList.isEmpty())
             return true;
